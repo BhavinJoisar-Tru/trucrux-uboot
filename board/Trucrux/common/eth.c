@@ -17,16 +17,14 @@
 
 int board_phy_config(struct phy_device *phydev)
 {
-	/* Disable RGMII RX clock delay (enabled by default) */
-	phy_write(phydev, MDIO_DEVAD_NONE, AR803x_PHY_DEBUG_ADDR_REG,
-		  AR803x_DEBUG_REG_0);
-	phy_write(phydev, MDIO_DEVAD_NONE, AR803x_PHY_DEBUG_DATA_REG, 0);
+	/* enable rgmii rxc skew and phy mode select to RGMII copper */
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x1f);
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x8);
 
-	/* Enable 1.8V VDDIO voltage */
-	phy_write(phydev, MDIO_DEVAD_NONE, AR803x_PHY_DEBUG_ADDR_REG,
-		  AR803x_DEBUG_REG_31);
-	phy_write(phydev, MDIO_DEVAD_NONE, AR803x_PHY_DEBUG_DATA_REG,
-		AR803x_VDDIO_1P8V_EN);
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x00);
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x82ee);
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x05);
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x100);
 
 	if (phydev->drv->config)
 		phydev->drv->config(phydev);
