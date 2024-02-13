@@ -17,6 +17,7 @@
 #include <usb.h>
 #include <dm.h>
 
+#include "../common/extcon-ptn5150.h"
 #include "../common/imx8_eeprom.h"
 #include "imx8mm_trucrux.h"
 
@@ -118,11 +119,26 @@ static int setup_fec(void)
 #endif
 
 #ifdef CONFIG_CI_UDC
+
+#ifdef CONFIG_EXTCON_PTN5150
+static struct extcon_ptn5150 usb_ptn5150;
+#endif
+
 int board_usb_init(int index, enum usb_init_type init)
 {
 	imx8m_usb_power(index, true);
 
-	return 0;
+#if (!defined(CONFIG_SPL_BUILD) && defined(CONFIG_EXTCON_PTN5150))
+	if (index == 0) {
+		/* Verify port is in proper mode */
+		int phy_mode = extcon_ptn5150_phy_mode(&usb_ptn5150);
+
+		/* Only verify phy_mode if ptn5150 is initialized */
+		if (phy_mode >= 0 && phy_mode != init)
+			return -ENODEV;
+	}
+#endif
+
 }
 
 int board_usb_cleanup(int index, enum usb_init_type init)
@@ -131,6 +147,19 @@ int board_usb_cleanup(int index, enum usb_init_type init)
 
 	return 0;
 }
+
+#ifdef CONFIG_EXTCON_PTN5150
+int board_ehci_usb_phy_mode(struct udevice *dev)
+{
+	int usb_phy_mode = extcon_ptn5150_phy_mode(&usb_ptn5150);
+
+	/* Default to host mode if not connected */
+	if (usb_phy_mode < 0)
+		usb_phy_mode = USB_INIT_HOST;
+
+	return usb_phy_mode;
+}
+#endif
 #endif
 
 int board_init(void)
@@ -181,6 +210,10 @@ int board_late_init(void)
 	struct trux_eeprom *ep = TRUX_EEPROM_DATA;
 	struct trux_carrier_eeprom carrier_eeprom;
 	char carrier_rev[16] = {0};
+
+#ifdef CONFIG_EXTCON_PTN5150
+	extcon_ptn5150_setup(&usb_ptn5150);
+#endif
 
 #ifdef CONFIG_FEC_MXC
 	trux_setup_mac(ep);
