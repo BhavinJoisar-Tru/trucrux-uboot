@@ -130,9 +130,19 @@
 	ptn5150: ptn5150@3d {
 		compatible = "nxp,ptn5150";
 		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_extcon>;
 		reg = <0x3d>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <10 IRQ_TYPE_NONE>;
+		irq-is-id-quirk;
 		i2c-bus = <0x1>;
 		status = "okay";
+
+		port {
+			typec1_dr_sw: endpoint {
+				remote-endpoint = <&usb1_drd_sw>;
+			};
+		};
 	};
 };
 
@@ -158,9 +168,11 @@
 		hnp-disable;
 	srp-disable;
 	adp-disable;
-	pic
+	usb-role-switch;
 	disable-over-current;
-	extcon = <&pthn5150>;
+	disable-over-current;
+	samsung,picophy-pre-emp-curr-control = <3>;
+	samsung,picophy-dc-vol-level-adjust = <7>;
 	status = "okay";
 };
 
@@ -178,5 +190,6 @@
 	non-removable;
 	bus-width = <4>;
 	vmmc-supply = <&reg_usdhc2_vmmc>;
+	no-1-8-v;
 	status = "okay";
 };
