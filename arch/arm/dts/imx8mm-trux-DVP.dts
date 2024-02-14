@@ -126,26 +126,7 @@
 	scl-gpios = <&gpio5 16 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio5 17 GPIO_ACTIVE_HIGH>;
 	status = "okay";
-
-	ptn5150: ptn5150@3d {
-		compatible = "nxp,ptn5150";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_extcon>;
-		reg = <0x3d>;
-		interrupt-parent = <&gpio1>;
-		interrupts = <10 IRQ_TYPE_NONE>;
-		irq-is-id-quirk;
-		i2c-bus = <0x1>;
-		status = "okay";
-
-		port {
-			typec1_dr_sw: endpoint {
-				remote-endpoint = <&usb1_drd_sw>;
-			};
-		};
-	};
 };
-
 
 &i2c4 {
 	clock-frequency = <100000>;
@@ -164,20 +145,10 @@
 };
 
 &usbotg1 {
-	dr_mode = "peripheral"
-		hnp-disable;
-	srp-disable;
-	adp-disable;
-	usb-role-switch;
-	disable-over-current;
-	disable-over-current;
-	samsung,picophy-pre-emp-curr-control = <3>;
-	samsung,picophy-dc-vol-level-adjust = <7>;
 	status = "okay";
 };
 
 &usbotg2 {
-	dr_mode = "host";
 	status = "okay";
 };
 
